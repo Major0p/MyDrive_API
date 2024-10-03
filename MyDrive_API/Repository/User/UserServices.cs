@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using MyDrive_API.Classes;
 using MyDrive_API.Data_Access;
 using MyDrive_API.DTOs.User;
 using MyDrive_API.Models.User;
-using System.Linq;
 
 namespace MyDrive_API.Repository.User
 {
@@ -17,68 +14,92 @@ namespace MyDrive_API.Repository.User
 
         public UserServices(MyDriveDBContext dbContext, IMapper mapper)
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _dbContext = dbContext;
+            _mapper = mapper;
         }
 
-        public async Task<UserDto> AddUser(UserDetails userDetails)
+        public async Task<ApiResponse<UserDto>> AddUser(UserDetails userDetails)
         {
-            UserDto userDto = new UserDto();
+            ApiResponse<UserDto> apiResponse = new();
             if (userDetails != null)
             {
                 await _dbContext.Users.AddAsync(userDetails);
                 await _dbContext.SaveChangesAsync();
-                _mapper.Map<UserDetails, UserDto>(userDetails);
+                apiResponse.SetSuccessApiResopnse();
             }
-            return userDto;
+            return apiResponse;
         }
 
-        public async Task<UserDto> GetUser(string userId)
+        public async Task<ApiResponse<UserDto>> GetUser(string userId)
         {
-            UserDto userDto = new UserDto();
+            ApiResponse<UserDto> apiResponse = new ApiResponse<UserDto>();
+
             if (!string.IsNullOrEmpty(userId))
             {
                 var userInfo = await _dbContext.Users.FindAsync(userId);
                 if (userInfo != null)
-                    userDto = _mapper.Map<UserDetails, UserDto>(userInfo);
+                {
+                    UserDto userDto = _mapper.Map<UserDetails, UserDto>(userInfo);
+                    List<UserDto> user = new List<UserDto>();
+                    user.Add(userDto);
+                    apiResponse.SetSuccessApiResopnse(user);
+                }
             }
-            return userDto;
+            return apiResponse;
         }
 
-        public async Task<UserDto> RemoveUser(string userId)
+        public async Task<ApiResponse<UserDto>> RemoveUser(string userId)
         {
-            UserDto userDto = new UserDto();
+            //remove all data related to the user 
+            ApiResponse<UserDto> apiResponse = new ApiResponse<UserDto>();
+
             if (!string.IsNullOrEmpty(userId))
             {
                 UserDetails userDetails = await _dbContext.Users.FindAsync(userId);
                 if (userDetails != null)
                 {
-                    userDto = _mapper.Map<UserDetails, UserDto>(userDetails);
+                    var toRemoveFiles = await _dbContext.FileInfos
+                        .Where(fl => fl.UserId == userId)
+                        .ToListAsync();
+
+                    var toRemoveFileStorage = await _dbContext.FileStorageInfos
+                        .Where(fs => fs.Id == userId)
+                        .ToListAsync();
+
+                    if (toRemoveFiles.Count > 0)
+                        _dbContext.FileInfos.RemoveRange(toRemoveFiles);
+
+                    if (toRemoveFileStorage.Count > 0)
+                        _dbContext.FileStorageInfos.RemoveRange(toRemoveFileStorage);
+
                     _dbContext.Users.Remove(userDetails);
                     await _dbContext.SaveChangesAsync();
+                    apiResponse.SetSuccessApiResopnse();
                 }
             }
-            return userDto;
+            return apiResponse;
         }
 
-        public async Task<UserDto> UpdateUser(UserDetails userDetails)
+        public async Task<ApiResponse<UserDto>> UpdateUser(UserDetails userDetails)
         {
-            UserDto userDto = new UserDto();
-            if (userDetails != null && !string.IsNullOrEmpty(userDetails.UserId) )
+            ApiResponse<UserDto> apiResponse = new ApiResponse<UserDto>();
+
+            if (userDetails != null && !string.IsNullOrEmpty(userDetails.UserId))
             {
                 var existingData = await _dbContext.Users.FindAsync(userDetails.UserId);
-                
-                
-                    _dbContext.Users.Update(userDetails);
 
+
+                _dbContext.Users.Update(userDetails);
                 await _dbContext.SaveChangesAsync();
-                _mapper.Map<UserDetails, UserDto>(userDetails);
+                apiResponse.SetSuccessApiResopnse();
             }
-            return userDto;
+            return apiResponse;
         }
 
-        public async Task<object> CheckUserIdPassword(UserDetails userDetails)
+        public async Task<ApiResponse<UserDto>> CheckUserIdPassword(UserDetails userDetails)
         {
+            ApiResponse<UserDto> apiResponse = new ApiResponse<UserDto>();
+
             if (!string.IsNullOrEmpty(userDetails.UserId) && !string.IsNullOrEmpty(userDetails.Password))
             {
                 //UserDetails user = await _dbContext.Users.FindAsync(userDetails.UserId);
@@ -88,18 +109,18 @@ namespace MyDrive_API.Repository.User
                     .Select(u => new UserDetails { UserId = u.UserId, Password = u.Password })
                     .FirstOrDefaultAsync();
 
-                if (user != null)
+                if (user != null && !string.IsNullOrEmpty(user.UserId) && !string.IsNullOrEmpty(user.Password))
                 {
-                    bool hasUser = false;
-                    bool hasPassword = false;   
-                    if (user.UserId != null && user.UserId == userDetails.UserId)
-                        hasUser = true;
-                    if (user.Password != null && user.Password == userDetails.Password)
-                        hasPassword = true;
-                    return new {id = hasUser,password= hasPassword };
+                    apiResponse.SetSuccessApiResopnse();
+
+                    if ((user.UserId != null && user.UserId == userDetails.UserId))
+                        apiResponse.Message = "userId not found";
+
+                    if ((user.Password != null && user.Password == userDetails.Password))
+                        apiResponse.Message = "password not found";
                 }
             }
-            return new { id = false, passoword = false };
+            return apiResponse;
         }
     }
 }

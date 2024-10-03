@@ -3,6 +3,8 @@ using MyDrive_API.Data_Access;
 using MyDrive_API.Mapper;
 using MyDrive_API.Repository.User;
 using AutoMapper;
+using Microsoft.Extensions.FileProviders;
+using MyDrive_API.Repository.FileManage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +20,9 @@ var config = builder.Configuration;
 var MyDriveDBCS = config.GetConnectionString("MyDriveDBCS");
 
 builder.Services.AddDbContext<MyDriveDBContext>(item => item.UseSqlServer(MyDriveDBCS));
-//builder.Services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
-//builder.Services.AddScoped<IUserServices, UserServices>();
-
-
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IFileServices, FileServices>();
 
 var app = builder.Build();
 

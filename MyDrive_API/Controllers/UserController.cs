@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyDrive_API.Classes;
+using MyDrive_API.Data_Access;
 using MyDrive_API.DTOs;
 using MyDrive_API.DTOs.User;
 using MyDrive_API.Models.User;
@@ -12,95 +14,86 @@ namespace MyDrive_API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-       /* private readonly IUserServices _userServices;
-        
+        private readonly IUserServices _userServices;
+
         public UserController(IUserServices userServices)
         {
             _userServices = userServices;
         }
 
+        private IActionResult HandleApiResponse<T>(ApiResponse<T> response)
+        {
+            string jsonString = JsonConvert.SerializeObject(response);
+
+            if (response.IsSuccess)
+                return Ok(jsonString);
+
+            return NotFound(jsonString);
+        }
+
         [HttpGet]
         [Route("GetUser")]
-        public IActionResult GetUser(string userId)
+        public async Task<IActionResult> GetUser(string userId)
         {
+            ApiResponse<UserDto> user = new();
+
             if (!string.IsNullOrEmpty(userId))
-            {
-               Task<UserDto> user = _userServices.GetUser(userId);
-                if (user != null)
-                {
-                    string jsonStr = JsonConvert.SerializeObject(user);
-                    return Ok(jsonStr);
-                }
-            }
-            return NotFound("failed to get user");
+                user = await _userServices.GetUser(userId);
+
+            return HandleApiResponse(user);
         }
 
         [HttpGet]
         [Route("RemoveUser")]
-        public IActionResult RemoveUser(string userId)
+        public async Task<IActionResult> RemoveUser(string userId)
         {
+            ApiResponse<UserDto> user = new();
+
             if (!string.IsNullOrEmpty(userId))
-            {
-                var user = _userServices.RemoveUser(userId);
-                if (user != null)
-                {
-                    string jsonStr = JsonConvert.SerializeObject(user);
-                    return Ok(jsonStr);
-                }
-            }
-            return NotFound("failed to rmove user");
+                user = await _userServices.RemoveUser(userId);
+
+            return HandleApiResponse(user);
         }
 
         [HttpPost]
         [Route("AddUser")]
-        public IActionResult AddUser(UserDetails userDetails)
+        public async Task<IActionResult> AddUser(UserDetails userDetails)
         {
+            ApiResponse<UserDto> user = new();
+
             if (ModelState.IsValid)
-            {
-                var user = _userServices.AddUser(userDetails);
-                if (user != null)
-                {
-                    var jsonStr = JsonConvert.SerializeObject(user);
-                    return Ok(jsonStr);
-                }
-            }
-            return NotFound("failed to add user");  
+                user = await _userServices.AddUser(userDetails);
+
+            return HandleApiResponse(user);
         }
 
         [HttpPost]
         [Route("UpdateUser")]
-        public IActionResult UpdateUser(UserDetails userDetails)
+        public async Task<IActionResult> UpdateUser(UserDetails userDetails)
         {
+            ApiResponse<UserDto> user = new();
+            
             if (ModelState.IsValid)
-            {
-                var user = _userServices.UpdateUser(userDetails);
-                if (user != null)
-                {
-                    var jsonStr = JsonConvert.SerializeObject(user);
-                    return Ok(jsonStr);
-                }
-            }
-            return NotFound("failed to update user");
+                user = await _userServices.UpdateUser(userDetails);
+            
+            return HandleApiResponse(user);
         }
 
         [HttpPost]
         [Route("CheckUserIdPassword")]
-        public IActionResult CheckUserIdPassword(UserDetails userDetails)
+        public async Task<IActionResult> CheckUserIdPassword(UserDetails userDetails)
         {
+            ApiResponse<UserDto> user = new();
+           
             if (!string.IsNullOrEmpty(userDetails.UserId) && !string.IsNullOrEmpty(userDetails.Password))
-            {
-                var user = _userServices.CheckUserIdPassword(userDetails);
-                if (user!= null)
-                {
-                    var jsonStr = JsonConvert.SerializeObject(user);
-                    return Ok(jsonStr);
-                }
-            }
-            return NotFound("failed to check userid and password");
+                user = await _userServices.CheckUserIdPassword(userDetails);
+
+            return HandleApiResponse(user);
         }
-*/
     }
 }
+
+
 
 
 
