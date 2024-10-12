@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <h1>File</h1>
+        <div>
+            <input id="fileInpt" type="file" >
+        </div>
+    </div>
+    <!-- <div>
+        <h1>User</h1>
+        <div>
+        </div>
+    </div> -->
+    <br>
+    <button onclick="send()">Send</button>
+</body>
+<script>
+    const fileInpt = document.getElementById("fileInpt");
+    const send = async ()=>{
+        let file = fileInpt.files[0];
+        let base64string = '';
+        await new Promise((res,rej)=>{
+            
+        });
+        let reader =  new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e)=>{
+                base64string = e.target.result;
+        }
+        let addFileUrl = "https://localhost:7149/api/File/add"
+        let url = addFileUrl;
+        let obj = {
+                data : base64string,
+                id : "shubham12",
+                uploadType : "FOLDER",
+                parentFolder : 'HOME',
+                starred : 'false',
+                trash : "false",
+            };
+        let res = await fetch(url,{
+            method : "POST",
+            body : JSON.stringify(obj),
+            headers:{
+                'Content-Type':'application/json'
+            }
+        });
+
+        console.log(res);
+    }
+</script>
+</html>
+

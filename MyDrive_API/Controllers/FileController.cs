@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyDrive_API.Classes;
 using MyDrive_API.DTOs.File;
@@ -7,8 +8,9 @@ using Newtonsoft.Json;
 
 namespace MyDrive_API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [EnableCors("AllowAll")]
     public class FileController : ControllerBase
     {
         private readonly IFileServices _fileServices;
@@ -28,133 +30,225 @@ namespace MyDrive_API.Controllers
             return NotFound(jsonString);
         }
 
-        [HttpPost]
+        [HttpPatch]
         [Route("Rename")]
-        public async Task<IActionResult> Rename(FileDetailsDto fileDetailsDto)
+        public async Task<IActionResult> Rename(string id, string NewName)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
+            try
+            {
+                if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(NewName))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.Rename(id, NewName);
 
-            if (!string.IsNullOrEmpty(fileDetailsDto.Id) && !string.IsNullOrEmpty(fileDetailsDto.FileName))
-                apiResponse = await _fileServices.Rename(fileDetailsDto);
-
-            return HandleApiResponse(apiResponse);
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("Check Id or Name");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPatch]
         [Route("SetFileToTrash")]
         public async Task<IActionResult> SetFileToTrash(string id, string isSet)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.SetFileToTrash(id, bool.Parse(isSet));
 
-            if (!string.IsNullOrEmpty(id))
-                apiResponse = await _fileServices.SetFileToTrash(id, bool.Parse(isSet));
-
-            return HandleApiResponse(apiResponse);
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("Id not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPatch]
         [Route("SetFolderToTrash")]
         public async Task<IActionResult> SetFolderToTrash(string id, string isSet)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.SetFolderToTrash(id, bool.Parse(isSet));
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("UserId not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
 
-            if (!string.IsNullOrEmpty(id))
-                apiResponse = await _fileServices.SetFolderToTrash(id, bool.Parse(isSet));
-
-            return HandleApiResponse(apiResponse);
         }
 
         [HttpGet]
         [Route("RemoveFolder")]
         public async Task<IActionResult> RemoveFolder(string id)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
-
-            if (!string.IsNullOrEmpty(id))
-                apiResponse = await _fileServices.RemoveFolder(id);
-
-            return HandleApiResponse(apiResponse);
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.RemoveFolder(id);
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("Id not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
         [Route("RemoveFile")]
         public async Task<IActionResult> RemoveFile(string id)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
-
-            if (!string.IsNullOrEmpty(id))
-                apiResponse = await _fileServices.RemoveFolder(id);
-
-            return HandleApiResponse(apiResponse);
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.RemoveFolder(id);
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("UserId not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPatch]
         [Route("SetFileStarred")]
-        public async Task<IActionResult> SetFileStarred(string id,string isSet)
+        public async Task<IActionResult> SetFileStarred(string id, string isSet)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
-
-            if (!string.IsNullOrEmpty(id))
-                apiResponse = await _fileServices.SetFileStarred(id,bool.Parse(isSet));
-
-            return HandleApiResponse(apiResponse);
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.SetFileStarred(id, bool.Parse(isSet));
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("id not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
         [Route("GetFilesByParent")]
         public async Task<IActionResult> GetFilesByParent(string id)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
-
-            if (!string.IsNullOrEmpty(id))
-                apiResponse = await _fileServices.GetFilesByParent(id);
-
-            return HandleApiResponse(apiResponse);
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.GetFilesByParent(id);
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("UserId not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPatch]
         [Route("MoveFile")]
-        public async Task<IActionResult> MoveFile(string id,string toId)
+        public async Task<IActionResult> MoveFile(string id, string toId)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
-
-            if (!string.IsNullOrEmpty(id))
-                apiResponse = await _fileServices.MoveFile(id, toId);
-
-            return HandleApiResponse(apiResponse);
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.MoveFile(id, toId);
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("UserId not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         [Route("Add")]
-        public async Task<IActionResult> Add(FileDetailsDto fileDetailsDto)
+        public async Task<IActionResult> Add([FromBody] FileDetailsDto fileDetailsDto)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
-
-            if (ModelState.IsValid)
-                apiResponse = await _fileServices.Add(fileDetailsDto);
-
-            return HandleApiResponse(apiResponse);  
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.Add(fileDetailsDto);
+                    return HandleApiResponse(apiResponse);
+                }
+                else
+                    return BadRequest("UserId not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
         [Route("Download")]
         public async Task<IActionResult> Download(string id)
         {
-            ApiResponse<FileDetailsDto> apiResponse = new();
-
-            if (!string.IsNullOrEmpty(id))
+            try
             {
-                apiResponse = await _fileServices.Download(id);
-
-                if(apiResponse.IsSuccess && apiResponse.Data.Count > 0)
+                if (!string.IsNullOrEmpty(id))
                 {
-                    var fileDetail = apiResponse.Data[0];
+                    ApiResponse<FileDetailsDto> apiResponse = new();
+                    apiResponse = await _fileServices.Download(id);
 
-                    return File(fileDetail.Data,"application/octet-stream",fileDetail.FileName);
+                    if (apiResponse.IsSuccess && apiResponse.Data.Count > 0)
+                    {
+                        var fileDetail = apiResponse.Data[0];
+
+                        return File(fileDetail.Data, "application/octet-stream", fileDetail.FileName);
+                    }
+                    return HandleApiResponse(apiResponse);
+
                 }
+                else
+                    return BadRequest("UserId not provide");
             }
-
-            return HandleApiResponse(apiResponse);
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

@@ -12,14 +12,14 @@ namespace MyDrive_API.Classes
         public ApiResponse()
         {
             IsSuccess = false;
-            Data = new List<T>();
+            Data = [];
             Message = "Failed"; 
         }
 
-        public void SetSuccessApiResopnse(List<T> DataList = null)
+        public void SetSuccessApiResopnse(List<T>? DataList = null)
         {
             IsSuccess = true;
-            Data = DataList ?? new List<T>();
+            Data = DataList ?? [];
             Message = "Success";
         }
     }

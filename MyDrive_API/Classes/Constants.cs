@@ -1,14 +1,8 @@
 ﻿namespace MyDrive_API.Classes
 {
-    public class Constants
+    public static class Constants
     {
-        public readonly string FolderUploadType;
-        public readonly string FileUploadType;
-
-        public Constants()
-        {
-            FolderUploadType = "FOLDER";
-            FileUploadType = "FILE";
-        }
+        public static readonly string FolderUploadType = "FOLDER";
+        public static readonly string FileUploadType = "FILE";
     }
 }

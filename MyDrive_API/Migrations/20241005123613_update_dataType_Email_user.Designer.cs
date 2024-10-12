@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyDrive_API.Data_Access;
 
@@ -11,9 +12,11 @@ using MyDrive_API.Data_Access;
 namespace MyDrive_API.Migrations
 {
     [DbContext(typeof(MyDriveDBContext))]
-    partial class MyDriveDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241005123613_update_dataType_Email_user")]
+    partial class update_dataType_Email_user
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,6 +139,11 @@ namespace MyDrive_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("Password");
+
+                    b.Property<byte[]>("Profile")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("Profile");
 
                     b.HasKey("UserId");
 

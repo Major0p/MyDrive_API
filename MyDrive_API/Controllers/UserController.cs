@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyDrive_API.Classes;
 using MyDrive_API.Data_Access;
@@ -7,11 +8,14 @@ using MyDrive_API.DTOs.User;
 using MyDrive_API.Models.User;
 using MyDrive_API.Repository.User;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
 
 namespace MyDrive_API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [EnableCors("AllowAll")]
+
     public class UserController : ControllerBase
     {
         private readonly IUserServices _userServices;
@@ -35,60 +39,104 @@ namespace MyDrive_API.Controllers
         [Route("GetUser")]
         public async Task<IActionResult> GetUser(string userId)
         {
-            ApiResponse<UserDto> user = new();
-
-            if (!string.IsNullOrEmpty(userId))
-                user = await _userServices.GetUser(userId);
-
-            return HandleApiResponse(user);
+            try
+            {
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    ApiResponse<UserDto> user = new();
+                    user = await _userServices.GetUser(userId);
+                    return HandleApiResponse(user);
+                }
+                else
+                    return BadRequest("UserId not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
         [Route("RemoveUser")]
         public async Task<IActionResult> RemoveUser(string userId)
         {
-            ApiResponse<UserDto> user = new();
-
-            if (!string.IsNullOrEmpty(userId))
-                user = await _userServices.RemoveUser(userId);
-
-            return HandleApiResponse(user);
+            try
+            {
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    ApiResponse<UserDto> user = new();
+                    user = await _userServices.RemoveUser(userId);
+                    return HandleApiResponse(user);
+                }
+                else
+                    return BadRequest("UserId not provide");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         [Route("AddUser")]
-        public async Task<IActionResult> AddUser(UserDetails userDetails)
+        public async Task<IActionResult> AddUser([FromBody] UserDetails userDetails)
         {
-            ApiResponse<UserDto> user = new();
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    ApiResponse<UserDto> user = new();
 
-            if (ModelState.IsValid)
-                user = await _userServices.AddUser(userDetails);
-
-            return HandleApiResponse(user);
+                    user = await _userServices.AddUser(userDetails);
+                    return HandleApiResponse(user);
+                }
+                else
+                    return BadRequest("model state is invalid, fill all details of user details");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         [Route("UpdateUser")]
-        public async Task<IActionResult> UpdateUser(UserDetails userDetails)
+        public async Task<IActionResult> UpdateUser([FromBody] UserDetails userDetails)
         {
-            ApiResponse<UserDto> user = new();
-            
-            if (ModelState.IsValid)
-                user = await _userServices.UpdateUser(userDetails);
-            
-            return HandleApiResponse(user);
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    ApiResponse<UserDto> user = new();
+                    user = await _userServices.UpdateUser(userDetails);
+                    return HandleApiResponse(user);
+                }
+                else return BadRequest("UserDetails are not provided");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         [Route("CheckUserIdPassword")]
-        public async Task<IActionResult> CheckUserIdPassword(UserDetails userDetails)
+        public async Task<IActionResult> CheckUserIdPassword([FromBody] UserDetails userDetails)
         {
-            ApiResponse<UserDto> user = new();
-           
-            if (!string.IsNullOrEmpty(userDetails.UserId) && !string.IsNullOrEmpty(userDetails.Password))
-                user = await _userServices.CheckUserIdPassword(userDetails);
-
-            return HandleApiResponse(user);
+            try
+            {
+                if (!string.IsNullOrEmpty(userDetails.UserId) && !string.IsNullOrEmpty(userDetails.Password))
+                {
+                    ApiResponse<UserDto> user = new();
+                    user = await _userServices.CheckUserIdPassword(userDetails);
+                    return HandleApiResponse(user);
+                }
+                else return BadRequest("UserDetails are not provided");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

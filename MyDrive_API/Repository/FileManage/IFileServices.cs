@@ -8,7 +8,7 @@ namespace MyDrive_API.Repository.FileManage
     {
         public Task<ApiResponse<FileDetailsDto>> UploadFolder(FileDetailsDto fileDetailsDto);
 
-        public Task<ApiResponse<FileDetailsDto>> Rename(FileDetailsDto fileDetailsDto);
+        public Task<ApiResponse<FileDetailsDto>> Rename(string id,string newName);
 
         public Task<ApiResponse<FileDetailsDto>> Add(FileDetailsDto fileDetailsDto);
 

@@ -9,11 +9,9 @@ namespace MyDrive_API.Mapper
     public class MappingProfile : Profile
     {
         public MappingProfile() {
-            CreateMap<UserDetails, UserDto>();
-            CreateMap<UserDto, UserDetails>();
+            CreateMap<UserDetails, UserDto>().ReverseMap();
 
-            CreateMap<FileDetails, FileDetailsDto>();
-            CreateMap<FileDetailsDto, FileDetails>();
+            CreateMap<FileDetails, FileDetailsDto>().ReverseMap();
         }
     }
 }

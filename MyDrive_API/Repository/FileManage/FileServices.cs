@@ -10,15 +10,13 @@ namespace MyDrive_API.Repository.FileManage
 {
     public class FileServices : IFileServices
     {
-        private readonly MyDriveDBContext _dbContext;   
+        private readonly MyDriveDBContext _dbContext;
         private readonly IMapper _mapper;
-        private readonly Constants _constants;
 
-        public FileServices(MyDriveDBContext dBContext,IMapper mapper, Constants constants)
+        public FileServices(MyDriveDBContext dBContext, IMapper mapper)
         {
-            _dbContext = dBContext; 
+            _dbContext = dBContext;
             _mapper = mapper;
-            _constants = constants;
         }
 
         public async Task<ApiResponse<FileDetailsDto>> Add(FileDetailsDto fileDetailsDto)
@@ -38,14 +36,15 @@ namespace MyDrive_API.Repository.FileManage
             return apiResponse;
         }
 
-        public async Task<ApiResponse<FileDetailsDto>> SetFileStarred(string id,bool isSet)
+        public async Task<ApiResponse<FileDetailsDto>> SetFileStarred(string id, bool isSet)
         {
             ApiResponse<FileDetailsDto> apiResponse = new();
 
             if (!string.IsNullOrEmpty(id))
             {
                 var fileInfo = await _dbContext.FileInfos
-                    .Where( fs => fs.Id == id)
+                        .AsNoTracking()
+                    .Where(fs => fs.Id == id)
                     .FirstOrDefaultAsync();
 
                 if (fileInfo != null)
@@ -63,20 +62,20 @@ namespace MyDrive_API.Repository.FileManage
             return apiResponse;
         }
 
-        public async Task<ApiResponse<FileDetailsDto>> SetFileToTrash(string id,bool isSet)
+        public async Task<ApiResponse<FileDetailsDto>> SetFileToTrash(string id, bool isSet)
         {
             ApiResponse<FileDetailsDto> apiResponse = new();
 
             if (!string.IsNullOrEmpty(id))
             {
-                var fileInfo = await _dbContext.FileInfos
-                    .Where( fl => fl.Id == id)
+                var fileInfo = await _dbContext.FileInfos.AsNoTracking()
+                    .Where(fl => fl.Id == id)
                     .FirstOrDefaultAsync();
 
                 if (fileInfo != null)
                 {
                     if (isSet)
-                    fileInfo.Trash = "true";
+                        fileInfo.Trash = "true";
                     else
                         fileInfo.Trash = "false";
 
@@ -94,14 +93,14 @@ namespace MyDrive_API.Repository.FileManage
 
             if (!string.IsNullOrEmpty(id))
             {
-                var fileInfo = await _dbContext.FileInfos
+                var fileInfo = await _dbContext.FileInfos.AsNoTracking()
                     .Where(fl => fl.Id == id)
                     .FirstOrDefaultAsync();
 
                 if (fileInfo != null)
                 {
                     if (isSet)
-                    fileInfo.Trash = "true";
+                        fileInfo.Trash = "true";
                     else
                         fileInfo.Trash = "false";
 
@@ -120,13 +119,13 @@ namespace MyDrive_API.Repository.FileManage
 
             if (!string.IsNullOrEmpty(id))
             {
-                var fileInfo = await _dbContext.FileInfos
+                var fileInfo = await _dbContext.FileInfos.AsNoTracking()
                     .Where(fl => fl.Id == id)
                     .FirstOrDefaultAsync();
 
                 if (fileInfo != null)
                 {
-                    var fileStorage = await _dbContext.FileStorageInfos
+                    var fileStorage = await _dbContext.FileStorageInfos.AsNoTracking()
                         .Where(fs => fs.Id == fileInfo.FileRefId)
                         .FirstOrDefaultAsync();
 
@@ -146,8 +145,8 @@ namespace MyDrive_API.Repository.FileManage
 
             if (!string.IsNullOrEmpty(id))
             {
-                var filesList = await _dbContext.FileInfos
-                    .Where(fl=>fl.ParentFolder == id)
+                var filesList = await _dbContext.FileInfos.AsNoTracking()
+                    .Where(fl => fl.ParentFolder == id)
                     .ToListAsync();
 
                 if (filesList.Count > 0)
@@ -166,7 +165,7 @@ namespace MyDrive_API.Repository.FileManage
 
             if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(toId))
             {
-                var fileDetails = await _dbContext.FileInfos
+                var fileDetails = await _dbContext.FileInfos.AsNoTracking()
                     .Where(fl => fl.Id == id)
                     .FirstOrDefaultAsync();
 
@@ -211,30 +210,30 @@ namespace MyDrive_API.Repository.FileManage
             {
                 await RemoveChildren(id);
 
-                var fileInfo = await _dbContext.FileInfos
+                var fileInfo = await _dbContext.FileInfos.AsNoTracking()
                     .Where(fl => fl.Id == id)
                     .FirstOrDefaultAsync();
-            
+
                 _dbContext.FileInfos.Remove(fileInfo);
-                await _dbContext.SaveChangesAsync();    
+                await _dbContext.SaveChangesAsync();
             }
 
             return apiResponse;
         }
 
-        public async Task<ApiResponse<FileDetailsDto>> Rename(FileDetailsDto fileDetails)
+        public async Task<ApiResponse<FileDetailsDto>> Rename(string id, string newName)
         {
             ApiResponse<FileDetailsDto> apiResponse = new();
 
-            if (!string.IsNullOrEmpty(fileDetails.Id) && !string.IsNullOrEmpty(fileDetails.FileName))
+            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(newName))
             {
-                var fileInfo = await _dbContext.FileInfos
-                    .Where( fs => fs.Id == fileDetails.Id)
-                    .FirstOrDefaultAsync(); 
+                var fileInfo = await _dbContext.FileInfos.AsNoTracking()
+                    .Where(fs => fs.Id == id)
+                    .FirstOrDefaultAsync();
 
-                if(fileInfo != null)
+                if (fileInfo != null)
                 {
-                    fileInfo.FileName = fileDetails.FileName;
+                    fileInfo.FileName = newName;
                     await _dbContext.SaveChangesAsync();
                     apiResponse.SetSuccessApiResopnse();
                 }
@@ -252,22 +251,22 @@ namespace MyDrive_API.Repository.FileManage
         {
             if (!string.IsNullOrEmpty(id))
             {
-                var fileInfo =  await _dbContext.FileInfos
-                    .Where(fl=>fl.Id == id)
+                var fileInfo = await _dbContext.FileInfos.AsNoTracking()
+                    .Where(fl => fl.Id == id)
                     .FirstOrDefaultAsync();
 
-                var childList = await _dbContext.FileInfos
-                    .Where ( fl => fl.ParentFolder == id)
+                var childList = await _dbContext.FileInfos.AsNoTracking()
+                    .Where(fl => fl.ParentFolder == id)
                     .ToListAsync();
 
-                if (fileInfo != null && childList != null && childList.Count > 0 )
+                if (fileInfo != null && childList != null && childList.Count > 0)
                 {
                     var trash = fileInfo.Trash;
                     foreach (var child in childList)
                     {
                         child.Trash = trash;
-                        
-                        if(child.UploadType == _constants.FolderUploadType)
+
+                        if (child.UploadType == Constants.FolderUploadType)
                             await SetTrashToChilds(child.Id);
                     }
 
@@ -281,11 +280,11 @@ namespace MyDrive_API.Repository.FileManage
         {
             if (!string.IsNullOrEmpty(id))
             {
-                var fileInfo = await _dbContext.FileInfos
+                var fileInfo = await _dbContext.FileInfos.AsNoTracking()
                     .Where(fl => fl.Id == id)
                     .FirstOrDefaultAsync();
 
-                var childList = await _dbContext.FileInfos
+                var childList = await _dbContext.FileInfos.AsNoTracking()
                     .Where(fl => fl.ParentFolder == id)
                     .ToListAsync();
 
@@ -293,19 +292,19 @@ namespace MyDrive_API.Repository.FileManage
                 {
                     foreach (var child in childList)
                     {
-                        if (child != null) 
+                        if (child != null)
                         {
-                            if (child.UploadType == _constants.FolderUploadType)
+                            if (child.UploadType == Constants.FolderUploadType)
                                 await RemoveChildren(child.Id);
 
-                            var fileData = await _dbContext.FileStorageInfos
-                                .Where(fs=>fs.Id == child.FileRefId)
+                            var fileData = await _dbContext.FileStorageInfos.AsNoTracking()
+                                .Where(fs => fs.Id == child.FileRefId)
                                 .FirstOrDefaultAsync();
 
-                             _dbContext.FileInfos.Remove(child);
+                            _dbContext.FileInfos.Remove(child);
 
-                                if(fileData != null)
-                            _dbContext.FileStorageInfos.Remove(fileData);
+                            if (fileData != null)
+                                _dbContext.FileStorageInfos.Remove(fileData);
                         }
                     }
 

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MyDrive_API.Classes;
 using MyDrive_API.Data_Access;
 using MyDrive_API.DTOs.User;
@@ -59,10 +60,12 @@ namespace MyDrive_API.Repository.User
                 if (userDetails != null)
                 {
                     var toRemoveFiles = await _dbContext.FileInfos
+                        .AsNoTracking()
                         .Where(fl => fl.UserId == userId)
                         .ToListAsync();
 
                     var toRemoveFileStorage = await _dbContext.FileStorageInfos
+                        .AsNoTracking()
                         .Where(fs => fs.Id == userId)
                         .ToListAsync();
 
@@ -86,9 +89,7 @@ namespace MyDrive_API.Repository.User
 
             if (userDetails != null && !string.IsNullOrEmpty(userDetails.UserId))
             {
-                var existingData = await _dbContext.Users.FindAsync(userDetails.UserId);
-
-
+                //var existingData = await _dbContext.Users.FindAsync(userDetails.UserId);
                 _dbContext.Users.Update(userDetails);
                 await _dbContext.SaveChangesAsync();
                 apiResponse.SetSuccessApiResopnse();
@@ -105,6 +106,7 @@ namespace MyDrive_API.Repository.User
                 //UserDetails user = await _dbContext.Users.FindAsync(userDetails.UserId);
 
                 var user = await _dbContext.Users
+                    .AsNoTracking()
                     .Where(u => u.UserId == userDetails.UserId)
                     .Select(u => new UserDetails { UserId = u.UserId, Password = u.Password })
                     .FirstOrDefaultAsync();
@@ -113,11 +115,17 @@ namespace MyDrive_API.Repository.User
                 {
                     apiResponse.SetSuccessApiResopnse();
 
-                    if ((user.UserId != null && user.UserId == userDetails.UserId))
+                    if (string.IsNullOrEmpty(user.UserId) || (!string.IsNullOrEmpty(user.UserId) && user.UserId != userDetails.UserId))
+                    {
                         apiResponse.Message = "userId not found";
+                        apiResponse.IsSuccess = false;
+                    }
 
-                    if ((user.Password != null && user.Password == userDetails.Password))
+                    if (string.IsNullOrEmpty(user.Password) || (!string.IsNullOrEmpty(user.Password) && user.Password != userDetails.Password))
+                    {
                         apiResponse.Message = "password not found";
+                        apiResponse.IsSuccess = false;
+                    }
                 }
             }
             return apiResponse;
