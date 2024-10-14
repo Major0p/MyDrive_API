@@ -8,6 +8,7 @@ namespace MyDrive_API.Repository.ResumeParser
         public Task<ApiResponse<FileStorageDetails>> GetFileById(string id);
 
         public ApiResponse<string> GetTextFromFile(FileStorageDetails fileStorageDetails);
+
     }
 }
 

@@ -17,6 +17,7 @@ namespace MyDrive_API.Controllers
         {
             _resumeParserService = resumeParserService;
         }
+
         private IActionResult HandleApiResponse<T>(ApiResponse<T> response)
         {
             string jsonString = JsonConvert.SerializeObject(response);

@@ -10,7 +10,6 @@ namespace MyDrive_API.Models.FileFolder
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("Id", TypeName = "varchar(16)")]
         public string Id { get; set; }
-        //yymmddhhmmssmsrn (2409251318232389)
 
         [Column("UserId", TypeName = "nvarchar(20)")]
         public string UserId { get; set; }

@@ -25,8 +25,35 @@ namespace MyDrive_API.Repository.FileManage
 
             if (fileDetailsDto != null)
             {
-                FileStorageDetails fileStorageDetails = _mapper.Map<FileStorageDetails>(fileDetailsDto);
+                string fileId = Utiles.CreateFileId();
+
+                for (int i=1;i<=1;i++)
+                {
+                    var isExist = await _dbContext.FileInfos.AsNoTracking().Where(fl=>fl.Id == fileId).FirstOrDefaultAsync();
+                    if (isExist != null)
+                    {
+                        fileId = Utiles.CreateFileId();
+                        i = 1;
+                    }
+                    else
+                        break;
+                }
+
                 FileDetails fileDetails = _mapper.Map<FileDetails>(fileDetailsDto);
+                fileDetails.FileName = fileDetailsDto.File.FileName;
+                fileDetails.FileSize = fileDetailsDto.File.Length;
+                fileDetails.FileExtension = Path.GetExtension(fileDetailsDto.File.FileName);
+                fileDetails.CreationDate = DateTime.UtcNow;
+                fileDetails.Id = fileId;
+                fileDetails.FileRefId = fileId+"FL";
+
+                FileStorageDetails fileStorageDetails = new()
+                {
+                    Data = await Utiles.ConvertIformFileToByteArray(fileDetailsDto.File),
+                    Id = fileDetails.FileRefId,
+                    UserId = fileDetailsDto.UserId
+                };//_mapper.Map<FileStorageDetails>(fileDetailsDto);
+
                 await _dbContext.FileInfos.AddAsync(fileDetails);
                 await _dbContext.FileStorageInfos.AddAsync(fileStorageDetails);
                 await _dbContext.SaveChangesAsync();

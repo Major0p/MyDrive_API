@@ -11,6 +11,7 @@ namespace MyDrive_API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [EnableCors("AllowAll")]
+
     public class FileController : ControllerBase
     {
         private readonly IFileServices _fileServices;
@@ -203,7 +204,7 @@ namespace MyDrive_API.Controllers
 
         [HttpPost]
         [Route("Add")]
-        public async Task<IActionResult> Add([FromBody] FileDetailsDto fileDetailsDto)
+        public async Task<IActionResult> Add([FromForm] FileDetailsDto fileDetailsDto)
         {
             try
             {

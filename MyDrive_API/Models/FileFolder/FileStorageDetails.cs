@@ -6,7 +6,6 @@ namespace MyDrive_API.Models.FileFolder
     public class FileStorageDetails
     {
         [Key]
-        [ForeignKey("Id")]
         [Column("Id", TypeName = "varchar(16)")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string Id { get; set; }
